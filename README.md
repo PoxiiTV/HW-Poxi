@@ -1,0 +1,155 @@
+<div align="center">
+
+# 🖥️ HW Poxi
+
+**Monitor de hardware gaming — temperatura, frecuencia, voltaje y potencia en tiempo real.**
+**Gaming hardware monitor — temperature, frequency, voltage and power in real time.**
+
+[![Tauri](https://img.shields.io/badge/Tauri-2.0-24C8DB?logo=tauri&logoColor=white)](https://tauri.app)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![Rust](https://img.shields.io/badge/Rust-1.77-000000?logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![CSharp](https://img.shields.io/badge/C%23-.NET%208-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com)
+[![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white)](#)
+[![License](https://img.shields.io/badge/license-MIT-9b5cf6)](LICENSE)
+
+*Interfaz glassmorphism · ejecutable único · datos reales del hardware*
+
+</div>
+
+---
+
+## 🇪🇸 Español
+
+**HW Poxi** es un monitor de hardware orientado a gaming para Windows 10 y 11. Muestra en tiempo real la temperatura, frecuencia, voltaje y consumo de tu CPU y GPU con valores mínimo, actual y máximo — como HWMonitor, pero con una interfaz moderna y dos modos de visualización.
+
+### ✨ Características
+
+| Función | Descripción |
+|---------|-------------|
+| 🌡️ **Temperaturas reales** | Paquete y por core (Intel y AMD Ryzen), actualización cada 0,5–2 s |
+| ⚡ **Frecuencias** | MHz por core en CPU y core/memoria en GPU |
+| 🔋 **Potencia** | Vatios de paquete CPU y GPU con decimales |
+| 🔌 **Voltajes** | Por core en CPU, core en GPU (requiere admin) |
+| 🎮 **VRAM** | Uso / total en MB para la GPU |
+| 📊 **Min / Actual / Máx** | Seguimiento automático de valores históricos de sesión |
+| 🖥️ **Vista Paquete / Por core** | Alterna entre datos globales y detalle por core individual |
+| 📌 **Modo Mini** | Overlay compacto 340×110 px — temperatura CPU + GPU + máx |
+| 📐 **Modo Completo** | Vista expandida 860×580 px con todas las métricas |
+| 🔝 **Siempre encima** | Mantén la ventana sobre cualquier juego o app |
+| 🛡️ **UAC automático** | Solicita permisos de administrador al abrir para acceso completo |
+| 📦 **Un solo .exe** | El sidecar C# va embebido — sin archivos extra que distribuir |
+
+### 🚀 Instalación
+
+**Opción A — Instalador (recomendado):**
+1. Descarga `HW-Poxi_1.0.0_x64-setup.exe` desde [Releases](../../releases).
+2. Ejecútalo y sigue el asistente.
+3. Abre **HW Poxi** y acepta el prompt de administrador.
+
+**Opción B — Portable:**
+1. Descarga `HW-Poxi.exe` desde [Releases](../../releases).
+2. Ejecútalo directamente — no requiere instalación.
+
+> Requiere **Windows 10/11 x64** y **.NET 8 Runtime** (incluido en el ejecutable portable).
+
+### 📊 Sensores disponibles
+
+| Sensor | Intel CPU | AMD Ryzen | NVIDIA GPU | AMD GPU |
+|--------|:---------:|:---------:|:----------:|:-------:|
+| Temp. paquete | ✅ | ✅ | ✅ | ✅ |
+| Temp. por core | ✅ | ✅ | — | — |
+| Frecuencia por core | ✅ | ✅ | — | — |
+| Frecuencia GPU core/mem | — | — | ✅ | ✅ |
+| Voltaje por core | ✅ | ✅ | — | — |
+| Potencia paquete | ✅ | ✅ | ✅ | ✅ |
+| VRAM | — | — | ✅ | ✅ |
+
+> Los voltajes y algunos datos por core requieren ejecutar como **administrador**.
+
+### 🧑‍💻 Compilar desde el código
+
+Requisitos: [Node.js](https://nodejs.org), [Rust](https://rustup.rs), [.NET 8 SDK](https://dotnet.microsoft.com/download) y Visual Studio C++ Build Tools.
+
+```bash
+# 1. Instala dependencias frontend
+npm install
+
+# 2. Compilar y lanzar en modo desarrollo
+start.bat           # compila el sidecar C# + arranca tauri dev
+
+# 3. Generar instalador + portable
+deploy.bat          # compila todo y copia a deploy-hosting/
+```
+
+---
+
+## 🇬🇧 English
+
+**HW Poxi** is a gaming-oriented hardware monitor for Windows 10 and 11. It displays real-time temperature, frequency, voltage and power consumption for your CPU and GPU with min, current and max values — like HWMonitor, but with a modern interface and two display modes.
+
+### ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 🌡️ **Real temperatures** | Package and per-core (Intel & AMD Ryzen), updated every 0.5–2 s |
+| ⚡ **Frequencies** | MHz per core on CPU and core/memory on GPU |
+| 🔋 **Power** | Package watts for CPU and GPU with decimals |
+| 🔌 **Voltages** | Per-core on CPU, core on GPU (requires admin) |
+| 🎮 **VRAM** | Used / total in MB for the GPU |
+| 📊 **Min / Current / Max** | Automatic session tracking of historical values |
+| 🖥️ **Package / Per-core view** | Switch between global data and individual core detail |
+| 📌 **Mini mode** | Compact 340×110 px overlay — CPU + GPU temp + max |
+| 📐 **Full mode** | Expanded 860×580 px view with all metrics |
+| 🔝 **Always on top** | Keep the window above any game or app |
+| 🛡️ **Auto UAC** | Requests admin permissions on launch for full sensor access |
+| 📦 **Single .exe** | The C# sidecar is embedded — no extra files to distribute |
+
+### 🚀 Installation
+
+**Option A — Installer (recommended):**
+1. Download `HW-Poxi_1.0.0_x64-setup.exe` from [Releases](../../releases).
+2. Run it and follow the wizard.
+3. Open **HW Poxi** and accept the administrator prompt.
+
+**Option B — Portable:**
+1. Download `HW-Poxi.exe` from [Releases](../../releases).
+2. Run it directly — no installation required.
+
+> Requires **Windows 10/11 x64**. .NET 8 Runtime is bundled in the portable executable.
+
+### 🧑‍💻 Build from source
+
+Requirements: [Node.js](https://nodejs.org), [Rust](https://rustup.rs), [.NET 8 SDK](https://dotnet.microsoft.com/download) and Visual Studio C++ Build Tools.
+
+```bash
+# 1. Install frontend dependencies
+npm install
+
+# 2. Build and launch in dev mode
+start.bat           # compiles C# sidecar + starts tauri dev
+
+# 3. Generate installer + portable
+deploy.bat          # builds everything and copies to deploy-hosting/
+```
+
+---
+
+## 🧩 Stack
+
+- **Tauri 2** (Rust) — ventana nativa, IPC, UAC / native window, IPC, UAC
+- **React 18 + TypeScript + Vite** — interfaz / UI
+- **Tailwind CSS 4 + Framer Motion** — diseño y animaciones / design & animations
+- **Zustand** — estado global / global state
+- **C# .NET 8** — sidecar de lectura de sensores / sensor reading sidecar
+- **LibreHardwareMonitor 0.9.4** — acceso directo al hardware / direct hardware access
+
+## 🙏 Créditos / Credits
+
+Motor de sensores basado en / Sensor engine based on:
+[LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) — el mismo motor que usa HWMonitor / the same engine HWMonitor uses.
+
+<div align="center">
+
+Hecho con 💜 por **Poxi**
+
+</div>
