@@ -1,0 +1,10 @@
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+hw-sidecar/bin/
+hw-sidecar/obj/
+hw-sidecar/publish/
+deploy-hosting/
+*.log
+.env
