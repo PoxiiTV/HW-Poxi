@@ -5,6 +5,7 @@
 **Monitor de hardware gaming — temperatura, frecuencia, carga, RAM y ventiladores en tiempo real.**
 **Gaming hardware monitor — temperature, frequency, load, RAM and fans in real time.**
 
+[![Version](https://img.shields.io/badge/versión-1.0.0-brightgreen)](#-historial-de-versiones--changelog)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-24C8DB?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/Rust-1.77-000000?logo=rust&logoColor=white)](https://www.rust-lang.org)
@@ -59,7 +60,9 @@
 1. Descarga `HW-Poxi.exe` desde [Releases](../../releases).
 2. Ejecútalo directamente — no requiere instalación.
 
-> Requiere **Windows 10/11 x64** y **.NET 8 Runtime** (incluido en el ejecutable portable).
+> Requiere **Windows 10/11 x64**. El runtime de .NET 8 va incluido en el ejecutable.
+
+> **Nota tray en Windows 11:** Al pulsar la X, la app se minimiza a la bandeja del sistema (no se cierra). Si no ves el icono, búscalo en el menú de desbordamiento del tray (la flecha `^` junto al reloj) y fíjalo para tenerlo siempre visible.
 
 ### 📊 Sensores disponibles
 
@@ -138,6 +141,8 @@ deploy.bat          # compila todo y copia a deploy-hosting/
 
 > Requires **Windows 10/11 x64**. .NET 8 Runtime is bundled in the portable executable.
 
+> **Windows 11 tray note:** Pressing X minimizes the app to the system tray (does not close it). If you don't see the icon, look in the tray overflow menu (the `^` arrow near the clock) and pin it to keep it always visible.
+
 ### 🧑‍💻 Build from source
 
 Requirements: [Node.js](https://nodejs.org), [Rust](https://rustup.rs), [.NET 8 SDK](https://dotnet.microsoft.com/download) and Visual Studio C++ Build Tools.
@@ -168,6 +173,42 @@ deploy.bat          # builds everything and copies to deploy-hosting/
 
 Motor de sensores basado en / Sensor engine based on:
 [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) — el mismo motor que usa HWMonitor / the same engine HWMonitor uses.
+
+---
+
+## 📋 Historial de versiones / Changelog
+
+### v1.0.0 — Lanzamiento inicial / Initial release
+
+**🇪🇸 Español**
+
+- **Vista completa** — CPU y GPU con temperaturas, frecuencias, voltajes, potencia, carga y ventiladores
+- **Vista por core** — detalle individual de cada core de CPU (temperatura, frecuencia, voltaje)
+- **Gráficas de historial** — línea de tiempo CPU + GPU de los últimos 60 segundos, estilo GPU-Z
+- **RAM del sistema** — usada / total en GB con porcentaje y barra de progreso (vía Windows API directa)
+- **Alertas de temperatura** — aviso in-app cuando CPU o GPU supera el umbral configurable (91 °C por defecto, cooldown de 30 s)
+- **Modo Mini** — overlay compacto siempre encima, con RAM opcional activable en ajustes
+- **Posición mini persistente** — recuerda dónde dejaste la ventana mini al cerrar
+- **Bandeja del sistema** — la X minimiza a tray; clic izquierdo muestra/oculta; menú derecho con Mostrar / Modo Mini / Salir
+- **Temas de color** — Azul (por defecto), Rojo gaming, Verde, Blanco
+- **Exportar CSV** — guarda el historial de sensores de la sesión en Descargas
+- **Ejecutable único** — el sidecar C# va embebido; sin archivos extra que distribuir
+- **UAC automático** — solicita permisos de administrador al abrir para acceso completo al hardware
+
+**🇬🇧 English**
+
+- **Full view** — CPU and GPU with temperatures, clocks, voltages, power, load and fans
+- **Per-core view** — individual core detail for CPU (temperature, clock, voltage)
+- **History charts** — 60-second CPU + GPU temperature timeline, GPU-Z style
+- **System RAM** — used / total GB with percentage and progress bar (via direct Windows API)
+- **Temperature alerts** — in-app notification when CPU or GPU exceeds configurable threshold (91°C default, 30 s cooldown)
+- **Mini mode** — compact always-on-top overlay with optional RAM toggle in settings
+- **Persistent mini position** — remembers where you left the mini window on close
+- **System tray** — X minimizes to tray; left-click toggles; right-click menu: Show / Mini mode / Quit
+- **Color themes** — Blue (default), Red gaming, Green, White
+- **Export CSV** — saves session sensor history to Downloads
+- **Single executable** — C# sidecar is embedded; no extra files to distribute
+- **Auto UAC** — requests admin permissions on launch for full hardware access
 
 <div align="center">
 
