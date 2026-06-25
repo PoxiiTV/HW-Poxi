@@ -3,7 +3,12 @@ use tauri::{AppHandle, Emitter};
 use tauri_plugin_shell::ShellExt;
 use tauri_plugin_shell::process::CommandEvent;
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
 use sidecar_data::BYTES as SIDECAR_BYTES;
+
+const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 fn sidecar_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let dir = std::env::var("LOCALAPPDATA")
@@ -14,6 +19,19 @@ fn sidecar_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
     Ok(dir.join("hw-sidecar.exe"))
 }
 
+fn kill_existing_sidecar() {
+    // Matar hw-sidecar.exe existente para poder sobreescribir el archivo
+    #[cfg(target_os = "windows")]
+    {
+        let _ = std::process::Command::new("taskkill")
+            .args(["/f", "/im", "hw-sidecar.exe"])
+            .creation_flags(CREATE_NO_WINDOW)
+            .output();
+        // Dar tiempo al SO para liberar el archivo
+        std::thread::sleep(std::time::Duration::from_millis(400));
+    }
+}
+
 fn extract_sidecar() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let path = sidecar_path()?;
     let needs_extract = path
@@ -22,15 +40,11 @@ fn extract_sidecar() -> Result<PathBuf, Box<dyn std::error::Error>> {
         .unwrap_or(true);
 
     if needs_extract {
-        // Si el archivo está en uso, intentamos de todas formas
-        if let Err(e) = std::fs::write(&path, SIDECAR_BYTES) {
-            if path.exists() {
-                // Archivo existe pero no se puede sobreescribir (en uso):
-                // usamos la versión que hay — puede ser de una sesión anterior
-                log::warn!("No se pudo actualizar sidecar ({e}), usando versión existente");
-            } else {
-                return Err(e.into());
-            }
+        // Intentar escribir directamente primero
+        if let Err(_) = std::fs::write(&path, SIDECAR_BYTES) {
+            // Si falla (archivo en uso), matar proceso anterior y reintentar
+            kill_existing_sidecar();
+            std::fs::write(&path, SIDECAR_BYTES)?;
         }
     }
     Ok(path)
@@ -42,7 +56,6 @@ pub fn spawn_sidecar(app: AppHandle, interval_ms: u32) {
         Err(e) => {
             let msg = e.to_string();
             log::error!("Sidecar no pudo iniciarse: {msg}");
-            // Emitir con delay para que el frontend esté listo
             let app2 = app.clone();
             std::thread::spawn(move || {
                 std::thread::sleep(std::time::Duration::from_millis(1500));
