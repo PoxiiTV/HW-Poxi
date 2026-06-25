@@ -1,13 +1,3 @@
 fn main() {
-    let mut attrs = tauri_build::Attributes::new();
-
-    #[cfg(target_os = "windows")]
-    {
-        attrs = attrs.windows_attributes(
-            tauri_build::WindowsAttributes::new()
-                .app_manifest(include_str!("app.manifest")),
-        );
-    }
-
-    tauri_build::try_build(attrs).expect("error en tauri build script");
+    tauri_build::build()
 }

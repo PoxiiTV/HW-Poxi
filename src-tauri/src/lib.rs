@@ -1,8 +1,15 @@
 mod commands;
+mod elevation;
 mod sidecar;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Comprueba admin ANTES de crear ventana — si no hay permisos,
+    // lanza UAC y cierra este proceso (el nuevo ya arranca elevado).
+    if !elevation::ensure_admin() {
+        return;
+    }
+
     tauri::Builder::default()
         .plugin(
             tauri_plugin_log::Builder::default()
@@ -18,8 +25,6 @@ pub fn run() {
             commands::reset_min_max,
         ])
         .setup(|app| {
-            // El sidecar se arranca en background — si falla, la UI muestra "Esperando datos..."
-            // y el log recoge el motivo exacto
             sidecar::spawn_sidecar(app.handle().clone(), 1000);
             Ok(())
         })
