@@ -1,4 +1,5 @@
 using LibreHardwareMonitor.Hardware;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace HwSidecar;
@@ -47,10 +48,14 @@ public sealed class HardwareReader : IDisposable
                 case HardwareType.GpuNvidia or HardwareType.GpuAmd or HardwareType.GpuIntel when gpu == null:
                     gpu = ReadGpu(hw); break;
                 case HardwareType.Memory when memory == null:
-                    try { memory = ReadMemory(hw); } catch { }
+                    try { memory = ReadMemoryLhwm(hw); } catch { }
                     break;
             }
         }
+
+        // Fallback garantizado: Windows API directa si LHWM no tiene datos
+        if (memory == null || memory.UsedGb == null)
+            memory = ReadMemoryWinApi();
 
         return new HwSnapshot(cpu, gpu, memory);
     }
@@ -153,8 +158,8 @@ public sealed class HardwareReader : IDisposable
         return new GpuData(hw.Name, temp, coreClock, memClock, voltage, power, load, fanRpm, vramUsed, vramTotal);
     }
 
-    // ── Memory ──────────────────────────────────────────────────────────────
-    private static MemoryData ReadMemory(IHardware hw)
+    // ── Memory vía LHWM ─────────────────────────────────────────────────────
+    private static MemoryData? ReadMemoryLhwm(IHardware hw)
     {
         float? usedGb      = null;
         float? availableGb = null;
@@ -162,19 +167,62 @@ public sealed class HardwareReader : IDisposable
 
         foreach (var s in hw.Sensors)
         {
-            switch (s.SensorType)
+            var n = s.Name;
+            if (s.SensorType == SensorType.Data)
             {
-                case SensorType.Data when s.Name.Contains("Used",      StringComparison.OrdinalIgnoreCase) && usedGb == null:
-                    usedGb = s.Value; break;
-                case SensorType.Data when s.Name.Contains("Available", StringComparison.OrdinalIgnoreCase) && availableGb == null:
-                    availableGb = s.Value; break;
-                case SensorType.Load when loadPercent == null:
-                    loadPercent = s.Value; break;
+                if (n.Contains("Used", StringComparison.OrdinalIgnoreCase) &&
+                    !n.Contains("Virtual", StringComparison.OrdinalIgnoreCase) &&
+                    usedGb == null)
+                    usedGb = s.Value;
+                else if ((n.Contains("Available", StringComparison.OrdinalIgnoreCase) ||
+                          n.Contains("Free",      StringComparison.OrdinalIgnoreCase)) &&
+                         !n.Contains("Virtual", StringComparison.OrdinalIgnoreCase) &&
+                         availableGb == null)
+                    availableGb = s.Value;
             }
+            else if (s.SensorType == SensorType.Load && loadPercent == null)
+                loadPercent = s.Value;
         }
+
+        if (usedGb == null && availableGb == null) return null;
 
         float? totalGb = usedGb.HasValue && availableGb.HasValue ? usedGb + availableGb : null;
         return new MemoryData(usedGb, totalGb, loadPercent);
+    }
+
+    // ── Memory vía Windows API (fallback infalible) ──────────────────────────
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MEMORYSTATUSEX
+    {
+        public uint   dwLength;
+        public uint   dwMemoryLoad;
+        public ulong  ullTotalPhys;
+        public ulong  ullAvailPhys;
+        public ulong  ullTotalPageFile;
+        public ulong  ullAvailPageFile;
+        public ulong  ullTotalVirtual;
+        public ulong  ullAvailVirtual;
+        public ulong  ullAvailExtendedVirtual;
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
+
+    private static MemoryData ReadMemoryWinApi()
+    {
+        var s = new MEMORYSTATUSEX
+        {
+            dwLength = (uint)Marshal.SizeOf<MEMORYSTATUSEX>()
+        };
+        if (!GlobalMemoryStatusEx(ref s))
+            return new MemoryData(null, null, null);
+
+        float totalGb = s.ullTotalPhys / (1024f * 1024f * 1024f);
+        float availGb = s.ullAvailPhys / (1024f * 1024f * 1024f);
+        float usedGb  = totalGb - availGb;
+        float loadPct = s.dwMemoryLoad;
+
+        return new MemoryData(usedGb, totalGb, loadPct);
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────
