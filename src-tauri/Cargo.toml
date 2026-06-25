@@ -24,3 +24,8 @@ log = "0.4"
 tauri = { version = "2.11.3", features = [] }
 tauri-plugin-log = "2"
 tauri-plugin-shell = "2"
+sidecar-data = { path = "sidecar-data" }
+
+# opt-level=0 evita que LLVM intente optimizar los 68 MB del sidecar (OOM)
+[profile.release.package.sidecar-data]
+opt-level = 0
