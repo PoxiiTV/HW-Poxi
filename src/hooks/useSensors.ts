@@ -13,6 +13,7 @@ interface RawSettings {
 export function useSensors() {
   const setSnapshot = useStore((s) => s.setSnapshot);
   const setSettings = useStore((s) => s.setSettings);
+  const setSidecarError = useStore((s) => s.setSidecarError);
 
   useEffect(() => {
     invoke<RawSettings>("get_settings")
@@ -25,15 +26,20 @@ export function useSensors() {
       })
       .catch(() => {});
 
-    const unlisten = listen<string>("sensor_data", (event) => {
+    const unlistenData = listen<string>("sensor_data", (event) => {
       try {
         const data = JSON.parse(event.payload) as HwSnapshot;
         setSnapshot(data);
       } catch { /* JSON malformado */ }
     });
 
+    const unlistenError = listen<string>("sidecar_error", (event) => {
+      setSidecarError(event.payload);
+    });
+
     return () => {
-      unlisten.then((fn) => fn());
+      unlistenData.then((fn) => fn());
+      unlistenError.then((fn) => fn());
     };
   }, []);
 }
