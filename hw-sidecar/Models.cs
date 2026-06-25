@@ -23,8 +23,16 @@ public record GpuData(
     SensorValue? MemoryClock,
     SensorValue? Voltage,
     SensorValue? Power,
+    SensorValue? Load,
+    SensorValue? FanRpm,
     float? VramUsedMb,
     float? VramTotalMb
 );
 
-public record HwSnapshot(CpuData? Cpu, GpuData? Gpu);
+public record MemoryData(
+    float? UsedGb,
+    float? TotalGb,
+    float? LoadPercent
+);
+
+public record HwSnapshot(CpuData? Cpu, GpuData? Gpu, MemoryData? Memory);

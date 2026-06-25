@@ -29,11 +29,13 @@ export function GpuCard() {
       </div>
 
       <SensorTable>
-        <SensorRow label="Temperatura" value={gpu.temp} type="temp" />
-        <SensorRow label="Freq. Core" value={gpu.coreClock} type="mhz" />
-        <SensorRow label="Freq. Memoria" value={gpu.memoryClock} type="mhz" />
-        <SensorRow label="Voltaje" value={gpu.voltage} type="voltage" />
-        <SensorRow label="Potencia" value={gpu.power} type="watt" />
+        <SensorRow label="Temperatura"   value={gpu.temp}        type="temp"    />
+        <SensorRow label="Carga"         value={gpu.load}        type="percent" />
+        <SensorRow label="Ventilador"    value={gpu.fanRpm}      type="rpm"     />
+        <SensorRow label="Freq. Core"    value={gpu.coreClock}   type="mhz"     />
+        <SensorRow label="Freq. Memoria" value={gpu.memoryClock} type="mhz"     />
+        <SensorRow label="Voltaje"       value={gpu.voltage}     type="voltage" />
+        <SensorRow label="Potencia"      value={gpu.power}       type="watt"    />
         {(gpu.vramUsedMb !== null || gpu.vramTotalMb !== null) && (
           <tr className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-hover)] transition-colors">
             <td className="py-1.5 pr-4 text-[var(--color-text-muted)] text-xs">VRAM</td>

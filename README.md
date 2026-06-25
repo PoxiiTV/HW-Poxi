@@ -2,8 +2,8 @@
 
 # 🖥️ HW Poxi
 
-**Monitor de hardware gaming — temperatura, frecuencia, voltaje y potencia en tiempo real.**
-**Gaming hardware monitor — temperature, frequency, voltage and power in real time.**
+**Monitor de hardware gaming — temperatura, frecuencia, carga, RAM y ventiladores en tiempo real.**
+**Gaming hardware monitor — temperature, frequency, load, RAM and fans in real time.**
 
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-24C8DB?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
@@ -20,22 +20,31 @@
 
 ## 🇪🇸 Español
 
-**HW Poxi** es un monitor de hardware orientado a gaming para Windows 10 y 11. Muestra en tiempo real la temperatura, frecuencia, voltaje y consumo de tu CPU y GPU con valores mínimo, actual y máximo — como HWMonitor, pero con una interfaz moderna y dos modos de visualización.
+**HW Poxi** es un monitor de hardware orientado a gaming para Windows 10 y 11. Muestra en tiempo real temperatura, frecuencia, voltaje, consumo, carga GPU, RAM y ventiladores de tu CPU y GPU con valores mínimo, actual y máximo — como HWMonitor, pero con interfaz moderna, gráficas de historial y bandeja del sistema.
 
 ### ✨ Características
 
 | Función | Descripción |
 |---------|-------------|
 | 🌡️ **Temperaturas reales** | Paquete y por core (Intel y AMD Ryzen), actualización cada 0,5–2 s |
+| 📈 **Gráficas de historial** | Línea de tiempo de CPU + GPU de los últimos 60 s (estilo GPU-Z) |
+| 🔔 **Alertas de temperatura** | Aviso en app cuando CPU o GPU supera el umbral configurable (91 °C por defecto) |
 | ⚡ **Frecuencias** | MHz por core en CPU y core/memoria en GPU |
 | 🔋 **Potencia** | Vatios de paquete CPU y GPU con decimales |
 | 🔌 **Voltajes** | Por core en CPU, core en GPU (requiere admin) |
 | 🎮 **VRAM** | Uso / total en MB para la GPU |
+| 💾 **RAM** | Usada / total GB con porcentaje y barra de progreso |
+| 🌀 **Carga GPU** | Porcentaje de utilización de la GPU |
+| 🌬️ **Ventiladores** | RPM del ventilador GPU (y CPU si el hardware lo expone) |
 | 📊 **Min / Actual / Máx** | Seguimiento automático de valores históricos de sesión |
 | 🖥️ **Vista Paquete / Por core** | Alterna entre datos globales y detalle por core individual |
-| 📌 **Modo Mini** | Overlay compacto 340×110 px — temperatura CPU + GPU + máx |
-| 📐 **Modo Completo** | Vista expandida 860×580 px con todas las métricas |
+| 📌 **Modo Mini** | Overlay compacto 340×110 px — temperatura CPU + GPU + RAM opcional |
+| 📐 **Modo Completo** | Vista expandida 860×580 px con todas las métricas y gráficas |
+| 🎨 **Temas de color** | Azul (por defecto), Rojo gaming, Verde, Blanco |
+| 🖱️ **Drag & drop mini** | Recuerda la posición de la ventana mini entre sesiones |
+| 🔲 **Bandeja del sistema** | Minimiza a tray; clic izquierdo muestra/oculta, menú derecho para modo mini o salir |
 | 🔝 **Siempre encima** | Mantén la ventana sobre cualquier juego o app |
+| 📥 **Exportar CSV** | Guarda el historial de sensores en Descargas |
 | 🛡️ **UAC automático** | Solicita permisos de administrador al abrir para acceso completo |
 | 📦 **Un solo .exe** | El sidecar C# va embebido — sin archivos extra que distribuir |
 
@@ -62,7 +71,10 @@
 | Frecuencia GPU core/mem | — | — | ✅ | ✅ |
 | Voltaje por core | ✅ | ✅ | — | — |
 | Potencia paquete | ✅ | ✅ | ✅ | ✅ |
+| Carga GPU % | — | — | ✅ | ✅ |
+| Ventilador GPU RPM | — | — | ✅ | ✅ |
 | VRAM | — | — | ✅ | ✅ |
+| RAM sistema | ✅ | ✅ | ✅ | ✅ |
 
 > Los voltajes y algunos datos por core requieren ejecutar como **administrador**.
 
@@ -85,22 +97,31 @@ deploy.bat          # compila todo y copia a deploy-hosting/
 
 ## 🇬🇧 English
 
-**HW Poxi** is a gaming-oriented hardware monitor for Windows 10 and 11. It displays real-time temperature, frequency, voltage and power consumption for your CPU and GPU with min, current and max values — like HWMonitor, but with a modern interface and two display modes.
+**HW Poxi** is a gaming-oriented hardware monitor for Windows 10 and 11. Displays real-time temperature, frequency, voltage, power, GPU load, RAM and fan speeds for your CPU and GPU with min, current and max values — like HWMonitor, but with a modern interface, history charts and system tray support.
 
 ### ✨ Features
 
 | Feature | Description |
 |---------|-------------|
 | 🌡️ **Real temperatures** | Package and per-core (Intel & AMD Ryzen), updated every 0.5–2 s |
+| 📈 **History charts** | 60-second CPU + GPU temperature timeline (GPU-Z style) |
+| 🔔 **Temperature alerts** | In-app notification when CPU or GPU exceeds configurable threshold (91°C default) |
 | ⚡ **Frequencies** | MHz per core on CPU and core/memory on GPU |
 | 🔋 **Power** | Package watts for CPU and GPU with decimals |
 | 🔌 **Voltages** | Per-core on CPU, core on GPU (requires admin) |
 | 🎮 **VRAM** | Used / total in MB for the GPU |
+| 💾 **RAM** | Used / total GB with percentage and progress bar |
+| 🌀 **GPU Load** | GPU utilization percentage |
+| 🌬️ **Fans** | GPU fan RPM (and CPU fan if exposed by hardware) |
 | 📊 **Min / Current / Max** | Automatic session tracking of historical values |
 | 🖥️ **Package / Per-core view** | Switch between global data and individual core detail |
-| 📌 **Mini mode** | Compact 340×110 px overlay — CPU + GPU temp + max |
-| 📐 **Full mode** | Expanded 860×580 px view with all metrics |
+| 📌 **Mini mode** | Compact 340×110 px overlay — CPU + GPU temp + optional RAM |
+| 📐 **Full mode** | Expanded 860×580 px view with all metrics and charts |
+| 🎨 **Color themes** | Blue (default), Red gaming, Green, White |
+| 🖱️ **Mini drag & drop** | Remembers mini window position between sessions |
+| 🔲 **System tray** | Minimize to tray; left-click toggle, right-click for mini mode or quit |
 | 🔝 **Always on top** | Keep the window above any game or app |
+| 📥 **Export CSV** | Save sensor history to Downloads folder |
 | 🛡️ **Auto UAC** | Requests admin permissions on launch for full sensor access |
 | 📦 **Single .exe** | The C# sidecar is embedded — no extra files to distribute |
 
@@ -136,7 +157,7 @@ deploy.bat          # builds everything and copies to deploy-hosting/
 
 ## 🧩 Stack
 
-- **Tauri 2** (Rust) — ventana nativa, IPC, UAC / native window, IPC, UAC
+- **Tauri 2** (Rust) — ventana nativa, IPC, UAC, bandeja / native window, IPC, UAC, tray
 - **React 18 + TypeScript + Vite** — interfaz / UI
 - **Tailwind CSS 4 + Framer Motion** — diseño y animaciones / design & animations
 - **Zustand** — estado global / global state

@@ -103,3 +103,51 @@ button:disabled { cursor: not-allowed; }
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(20px, -30px) scale(1.08); }
 }
+
+/* ── Orb colors — default (blue/purple) ──────────────────────────────── */
+:root {
+  --theme-orb1: #5b7cfa;
+  --theme-orb2: #a06bff;
+  --color-bg-solid: #0a0c1a;
+}
+
+/* ── Tema: Rojo gaming ───────────────────────────────────────────────── */
+[data-theme="red"] {
+  --color-accent:      #ff4d6d;
+  --color-accent-2:    #ff8c42;
+  --color-accent-soft: rgb(255 77 109 / 0.16);
+  --theme-orb1: #cc1a38;
+  --theme-orb2: #cc5a1e;
+  --color-bg-solid: #1a0608;
+}
+
+/* ── Tema: Verde ─────────────────────────────────────────────────────── */
+[data-theme="green"] {
+  --color-accent:      #00d97e;
+  --color-accent-2:    #00c9a7;
+  --color-accent-soft: rgb(0 217 126 / 0.16);
+  --theme-orb1: #007a48;
+  --theme-orb2: #007060;
+  --color-bg-solid: #04120c;
+}
+
+/* ── Tema: Blanco ────────────────────────────────────────────────────── */
+[data-theme="white"] {
+  --color-bg-0: #e8ecff;
+  --color-bg-1: #dde2f8;
+  --color-bg-2: #d0d6f5;
+  --color-surface:        rgb(255 255 255 / 0.55);
+  --color-surface-hover:  rgb(255 255 255 / 0.75);
+  --color-surface-active: rgb(0 0 0 / 0.06);
+  --color-border:         rgb(0 0 0 / 0.10);
+  --color-border-strong:  rgb(0 0 0 / 0.18);
+  --color-text:           #1a1c2e;
+  --color-text-muted:     #4a4e6b;
+  --color-text-dim:       #8890b3;
+  --color-accent:      #4f6bff;
+  --color-accent-2:    #8b52ff;
+  --color-accent-soft: rgb(79 107 255 / 0.14);
+  --theme-orb1: rgba(79 107 255 / 0.35);
+  --theme-orb2: rgba(139 82 255 / 0.30);
+  --color-bg-solid: #e8ecff;
+}

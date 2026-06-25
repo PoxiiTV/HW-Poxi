@@ -4,18 +4,20 @@ import { TempBadge } from "./TempBadge";
 interface Props {
   label: string;
   value: SensorValue | null | undefined;
-  type: "temp" | "mhz" | "voltage" | "watt" | "mb";
+  type: "temp" | "mhz" | "voltage" | "watt" | "mb" | "percent" | "rpm";
 }
 
 function fmt(v: number | null | undefined, type: Props["type"]): React.ReactNode {
   if (v === null || v === undefined)
     return <span className="text-[var(--color-text-dim)]">—</span>;
   switch (type) {
-    case "mhz": return <span className="tabular-nums">{Math.round(v)} MHz</span>;
+    case "mhz":     return <span className="tabular-nums">{Math.round(v)} MHz</span>;
     case "voltage": return <span className="tabular-nums">{v.toFixed(3)} V</span>;
-    case "watt": return <span className="tabular-nums">{v.toFixed(1)} W</span>;
-    case "mb": return <span className="tabular-nums">{Math.round(v)} MB</span>;
-    case "temp": return <TempBadge value={v} />;
+    case "watt":    return <span className="tabular-nums">{v.toFixed(1)} W</span>;
+    case "mb":      return <span className="tabular-nums">{Math.round(v)} MB</span>;
+    case "percent": return <span className="tabular-nums">{v.toFixed(1)} %</span>;
+    case "rpm":     return <span className="tabular-nums">{Math.round(v)} RPM</span>;
+    case "temp":    return <TempBadge value={v} />;
   }
 }
 

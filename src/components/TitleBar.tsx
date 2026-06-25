@@ -2,12 +2,26 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { useStore } from "../store";
 
+function buildRaw(s: ReturnType<typeof useStore.getState>["settings"]) {
+  return {
+    always_on_top: s.alwaysOnTop,
+    interval_ms:   s.intervalMs,
+    unit:          s.unit,
+    theme:         s.theme,
+    alert_enabled: s.alertEnabled,
+    alert_temp_c:  s.alertTempC,
+    mini_show_ram: s.miniShowRam,
+    mini_x:        s.miniX,
+    mini_y:        s.miniY,
+  };
+}
+
 export function TitleBar() {
-  const mode = useStore((s) => s.mode);
-  const setMode = useStore((s) => s.setMode);
+  const mode           = useStore((s) => s.mode);
+  const setMode        = useStore((s) => s.setMode);
   const setSettingsOpen = useStore((s) => s.setSettingsOpen);
-  const settings = useStore((s) => s.settings);
-  const setSettings = useStore((s) => s.setSettings);
+  const settings       = useStore((s) => s.settings);
+  const setSettings    = useStore((s) => s.setSettings);
 
   const win = getCurrentWindow();
 
@@ -18,16 +32,10 @@ export function TitleBar() {
   };
 
   const togglePin = async () => {
-    const next = !settings.alwaysOnTop;
-    await invoke("set_always_on_top", { enabled: next });
-    setSettings({ alwaysOnTop: next });
-    await invoke("save_settings", {
-      settings: {
-        always_on_top: next,
-        interval_ms: settings.intervalMs,
-        unit: settings.unit,
-      },
-    });
+    const next = { ...settings, alwaysOnTop: !settings.alwaysOnTop };
+    await invoke("set_always_on_top", { enabled: next.alwaysOnTop });
+    setSettings({ alwaysOnTop: next.alwaysOnTop });
+    await invoke("save_settings", { settings: buildRaw(next) });
   };
 
   return (
@@ -44,10 +52,10 @@ export function TitleBar() {
           <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="url(#g2)" strokeWidth="1.5" strokeLinecap="round" />
           <defs>
             <linearGradient id="g1" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#6d8bff" /><stop offset="1" stopColor="#a06bff" />
+              <stop stopColor="var(--color-accent)" /><stop offset="1" stopColor="var(--color-accent-2)" />
             </linearGradient>
             <linearGradient id="g2" x1="2" y1="12" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#6d8bff" /><stop offset="1" stopColor="#a06bff" />
+              <stop stopColor="var(--color-accent)" /><stop offset="1" stopColor="var(--color-accent-2)" />
             </linearGradient>
           </defs>
         </svg>
@@ -96,7 +104,8 @@ export function TitleBar() {
           ─
         </button>
         <button
-          onClick={() => win.close()}
+          onClick={() => win.hide()}
+          title="Minimizar a bandeja"
           className="w-7 h-7 rounded-lg flex items-center justify-center text-sm text-[var(--color-text-dim)] hover:text-red-400 hover:bg-red-500/10 transition-colors"
         >
           ✕
