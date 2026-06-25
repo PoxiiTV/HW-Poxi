@@ -13,7 +13,7 @@ function fmt(v: number | null | undefined, type: Props["type"]): React.ReactNode
   switch (type) {
     case "mhz": return <span className="tabular-nums">{Math.round(v)} MHz</span>;
     case "voltage": return <span className="tabular-nums">{v.toFixed(3)} V</span>;
-    case "watt": return <span className="tabular-nums">{Math.round(v)} W</span>;
+    case "watt": return <span className="tabular-nums">{v.toFixed(1)} W</span>;
     case "mb": return <span className="tabular-nums">{Math.round(v)} MB</span>;
     case "temp": return <TempBadge value={v} />;
   }

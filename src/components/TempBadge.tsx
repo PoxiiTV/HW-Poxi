@@ -18,7 +18,7 @@ export function TempBadge({ value, size = "sm" }: Props) {
     return <span className="text-[var(--color-text-dim)]">—</span>;
   }
 
-  const display = unit === "F" ? Math.round(value * 9 / 5 + 32) : Math.round(value);
+  const display = unit === "F" ? (value * 9 / 5 + 32).toFixed(1) : value.toFixed(1);
   const suffix = unit === "F" ? "°F" : "°C";
   const color = getTempColor(value);
 
