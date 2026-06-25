@@ -18,6 +18,9 @@ export function CpuCard() {
     );
   }
 
+  // AMD Ryzen no expone temp por core — ocultar fila si ningún core tiene dato
+  const hasCoreTemp = cpu.cores.some((c) => c.temp?.value != null);
+
   return (
     <div className="glass rounded-[var(--radius-card)] p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
@@ -55,11 +58,15 @@ export function CpuCard() {
               <SensorRow label="Potencia" value={cpu.packagePower} type="watt" />
             </>
           ) : (
-            cpu.cores.flatMap((core) => [
-              <SensorRow key={`t${core.id}`} label={`Core #${core.id} — Temp`} value={core.temp} type="temp" />,
-              <SensorRow key={`c${core.id}`} label={`Core #${core.id} — Freq`} value={core.clock} type="mhz" />,
-              <SensorRow key={`v${core.id}`} label={`Core #${core.id} — Voltaje`} value={core.voltage} type="voltage" />,
-            ])
+            <>
+              {cpu.cores.flatMap((core) => [
+                ...(hasCoreTemp
+                  ? [<SensorRow key={`t${core.id}`} label={`Core #${core.id} — Temp`} value={core.temp} type="temp" />]
+                  : []),
+                <SensorRow key={`c${core.id}`} label={`Core #${core.id} — Freq`} value={core.clock} type="mhz" />,
+                <SensorRow key={`v${core.id}`} label={`Core #${core.id} — Voltaje`} value={core.voltage} type="voltage" />,
+              ])}
+            </>
           )}
         </SensorTable>
       </div>

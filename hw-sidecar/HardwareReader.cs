@@ -6,6 +6,7 @@ namespace HwSidecar;
 public sealed class HardwareReader : IDisposable
 {
     private readonly Computer _computer;
+    private bool _dumped;
 
     public HardwareReader()
     {
@@ -40,52 +41,26 @@ public sealed class HardwareReader : IDisposable
         return new HwSnapshot(cpu, gpu);
     }
 
-    private static CpuData ReadCpu(IHardware hw)
+    private CpuData ReadCpu(IHardware hw)
     {
-        // Dump de diagnóstico en el primer ciclo (solo stderr, no interfiere con JSON en stdout)
-        DumpSensors(hw, "CPU");
-
         SensorValue? pkgTemp = null;
         SensorValue? pkgPower = null;
         var coreTemps = new Dictionary<int, ISensor>();
         var coreClocks = new Dictionary<int, ISensor>();
         var coreVolts = new Dictionary<int, ISensor>();
 
-        foreach (var s in hw.Sensors)
+        // Leer sensores del hardware principal
+        ProcessCpuSensors(hw.Sensors, ref pkgTemp, ref pkgPower, coreTemps, coreClocks, coreVolts);
+
+        // AMD Ryzen: las temps por core suelen estar en sub-hardware
+        foreach (var sub in hw.SubHardware)
+            ProcessCpuSensors(sub.Sensors, ref pkgTemp, ref pkgPower, coreTemps, coreClocks, coreVolts);
+
+        // Diagnóstico: vuelca todos los sensores en el primer ciclo
+        if (!_dumped)
         {
-            var name = s.Name;
-
-            switch (s.SensorType)
-            {
-                case SensorType.Temperature:
-                    // AMD: "CPU Package", "Core (Tdie)", Intel: "CPU Package"
-                    if (pkgTemp == null && IsPackageTemp(name))
-                    {
-                        pkgTemp = ToValue(s);
-                    }
-                    // AMD: "Core #0", Intel: "CPU Core #0"
-                    else if (IsCoreTemp(name))
-                    {
-                        TryAddIndexed(coreTemps, s);
-                    }
-                    break;
-
-                case SensorType.Power:
-                    if (pkgPower == null && IsPackagePower(name))
-                        pkgPower = ToValue(s);
-                    break;
-
-                case SensorType.Clock:
-                    // AMD: "Core #0", Intel: "CPU Core #0"
-                    if (IsCoreMetric(name))
-                        TryAddIndexed(coreClocks, s);
-                    break;
-
-                case SensorType.Voltage:
-                    if (IsCoreMetric(name))
-                        TryAddIndexed(coreVolts, s);
-                    break;
-            }
+            _dumped = true;
+            DumpAll(hw);
         }
 
         var coreIds = coreTemps.Keys
@@ -104,30 +79,61 @@ public sealed class HardwareReader : IDisposable
         return new CpuData(hw.Name, pkgTemp, pkgPower, cores);
     }
 
-    // AMD: "CPU Package", "Core (Tdie)", "Tdie", "Tctl/Tdie"
-    // Intel: "CPU Package"
+    private static void ProcessCpuSensors(
+        IEnumerable<ISensor> sensors,
+        ref SensorValue? pkgTemp,
+        ref SensorValue? pkgPower,
+        Dictionary<int, ISensor> coreTemps,
+        Dictionary<int, ISensor> coreClocks,
+        Dictionary<int, ISensor> coreVolts)
+    {
+        foreach (var s in sensors)
+        {
+            var name = s.Name;
+            switch (s.SensorType)
+            {
+                case SensorType.Temperature:
+                    if (pkgTemp == null && IsPackageTemp(name))
+                        pkgTemp = ToValue(s);
+                    else if (IsCoreIndexed(name))
+                        TryAddIndexed(coreTemps, s);
+                    break;
+
+                case SensorType.Power:
+                    if (pkgPower == null && IsPackagePower(name))
+                        pkgPower = ToValue(s);
+                    break;
+
+                case SensorType.Clock:
+                    if (IsCoreIndexed(name))
+                        TryAddIndexed(coreClocks, s);
+                    break;
+
+                case SensorType.Voltage:
+                    if (IsCoreIndexed(name))
+                        TryAddIndexed(coreVolts, s);
+                    break;
+            }
+        }
+    }
+
+    // "CPU Package", "Package", "Core (Tdie)", "Tdie", "Tctl/Tdie"
     private static bool IsPackageTemp(string name) =>
         name.Contains("Package", StringComparison.OrdinalIgnoreCase) ||
-        name.Contains("Tdie", StringComparison.OrdinalIgnoreCase) ||
-        name.Contains("Tctl", StringComparison.OrdinalIgnoreCase);
+        name.Contains("Tdie",    StringComparison.OrdinalIgnoreCase) ||
+        name.Contains("Tctl",    StringComparison.OrdinalIgnoreCase);
 
-    // AMD: "Core #N"  Intel: "CPU Core #N"
-    private static bool IsCoreTemp(string name) =>
-        Regex.IsMatch(name, @"Core\s*#\d+", RegexOptions.IgnoreCase);
-
-    // AMD power: "Package", "Core (SVI2 TFN)"  Intel: "CPU Package"
+    // "Package", "CPU Package", "Core (SVI2 TFN)"
     private static bool IsPackagePower(string name) =>
         name.Contains("Package", StringComparison.OrdinalIgnoreCase) ||
         name.Equals("CPU", StringComparison.OrdinalIgnoreCase);
 
-    // AMD/Intel core metric (clock/voltage): "Core #N" or "CPU Core #N"
-    private static bool IsCoreMetric(string name) =>
+    // "Core #0", "CPU Core #0", "Core #0 Distance..." — cualquier sensor indexado por core
+    private static bool IsCoreIndexed(string name) =>
         Regex.IsMatch(name, @"Core\s*#\d+", RegexOptions.IgnoreCase);
 
     private static GpuData ReadGpu(IHardware hw)
     {
-        DumpSensors(hw, "GPU");
-
         SensorValue? temp = null;
         SensorValue? coreClock = null;
         SensorValue? memClock = null;
@@ -142,41 +148,37 @@ public sealed class HardwareReader : IDisposable
             switch (s.SensorType)
             {
                 case SensorType.Temperature when temp == null:
-                    temp = ToValue(s);
-                    break;
+                    temp = ToValue(s); break;
                 case SensorType.Clock when name.Contains("Core", StringComparison.OrdinalIgnoreCase) && coreClock == null:
-                    coreClock = ToValue(s);
-                    break;
+                    coreClock = ToValue(s); break;
                 case SensorType.Clock when name.Contains("Memory", StringComparison.OrdinalIgnoreCase) && memClock == null:
-                    memClock = ToValue(s);
-                    break;
+                    memClock = ToValue(s); break;
                 case SensorType.Voltage when name.Contains("Core", StringComparison.OrdinalIgnoreCase) && voltage == null:
-                    voltage = ToValue(s);
-                    break;
+                    voltage = ToValue(s); break;
                 case SensorType.Power when power == null:
-                    power = ToValue(s);
-                    break;
+                    power = ToValue(s); break;
                 case SensorType.SmallData when name.Contains("Used", StringComparison.OrdinalIgnoreCase) && vramUsed == null:
-                    vramUsed = s.Value;
-                    break;
+                    vramUsed = s.Value; break;
                 case SensorType.SmallData when name.Contains("Total", StringComparison.OrdinalIgnoreCase) && vramTotal == null:
-                    vramTotal = s.Value;
-                    break;
+                    vramTotal = s.Value; break;
             }
         }
 
         return new GpuData(hw.Name, temp, coreClock, memClock, voltage, power, vramUsed, vramTotal);
     }
 
-    private static bool _dumped = false;
-    private static void DumpSensors(IHardware hw, string label)
+    private static void DumpAll(IHardware hw)
     {
-        if (_dumped) return;
-        _dumped = true;
-
-        Console.Error.WriteLine($"=== {label}: {hw.Name} ===");
+        Console.Error.WriteLine($"=== CPU: {hw.Name} ===");
         foreach (var s in hw.Sensors)
             Console.Error.WriteLine($"  [{s.SensorType}] \"{s.Name}\" = {s.Value}");
+
+        foreach (var sub in hw.SubHardware)
+        {
+            Console.Error.WriteLine($"  --- SubHW: {sub.Name} ---");
+            foreach (var s in sub.Sensors)
+                Console.Error.WriteLine($"    [{s.SensorType}] \"{s.Name}\" = {s.Value}");
+        }
     }
 
     private static void TryAddIndexed(Dictionary<int, ISensor> dict, ISensor s)
