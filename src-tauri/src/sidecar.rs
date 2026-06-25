@@ -3,7 +3,6 @@ use tauri::{AppHandle, Emitter};
 use tauri_plugin_shell::ShellExt;
 use tauri_plugin_shell::process::CommandEvent;
 
-// Bytes del sidecar incrustados (en crate separada con opt-level=0 para evitar OOM en LLVM)
 use sidecar_data::BYTES as SIDECAR_BYTES;
 
 fn sidecar_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
@@ -17,13 +16,22 @@ fn sidecar_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
 
 fn extract_sidecar() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let path = sidecar_path()?;
-    // Re-extrae solo si el tamaño difiere (indica nueva versión)
     let needs_extract = path
         .metadata()
         .map(|m| m.len() != SIDECAR_BYTES.len() as u64)
         .unwrap_or(true);
+
     if needs_extract {
-        std::fs::write(&path, SIDECAR_BYTES)?;
+        // Si el archivo está en uso, intentamos de todas formas
+        if let Err(e) = std::fs::write(&path, SIDECAR_BYTES) {
+            if path.exists() {
+                // Archivo existe pero no se puede sobreescribir (en uso):
+                // usamos la versión que hay — puede ser de una sesión anterior
+                log::warn!("No se pudo actualizar sidecar ({e}), usando versión existente");
+            } else {
+                return Err(e.into());
+            }
+        }
     }
     Ok(path)
 }
@@ -32,8 +40,14 @@ pub fn spawn_sidecar(app: AppHandle, interval_ms: u32) {
     match try_spawn(&app, interval_ms) {
         Ok(()) => {}
         Err(e) => {
-            log::error!("Sidecar no pudo iniciarse: {e}");
-            let _ = app.emit("sidecar_error", e.to_string());
+            let msg = e.to_string();
+            log::error!("Sidecar no pudo iniciarse: {msg}");
+            // Emitir con delay para que el frontend esté listo
+            let app2 = app.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_millis(1500));
+                let _ = app2.emit("sidecar_error", msg);
+            });
         }
     }
 }
@@ -50,12 +64,15 @@ fn try_spawn(app: &AppHandle, interval_ms: u32) -> Result<(), Box<dyn std::error
 
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
+        let mut received_any = false;
+
         while let Some(event) = rx.recv().await {
             match event {
                 CommandEvent::Stdout(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
                     let trimmed = line.trim().to_string();
                     if !trimmed.is_empty() {
+                        received_any = true;
                         let _ = app.emit("sensor_data", trimmed);
                     }
                 }
@@ -70,6 +87,17 @@ fn try_spawn(app: &AppHandle, interval_ms: u32) -> Result<(), Box<dyn std::error
                 }
                 CommandEvent::Terminated(status) => {
                     log::warn!("Sidecar terminó con código: {:?}", status.code);
+                    if !received_any {
+                        let app2 = app.clone();
+                        let code = status.code.unwrap_or(-1);
+                        std::thread::spawn(move || {
+                            std::thread::sleep(std::time::Duration::from_millis(500));
+                            let _ = app2.emit(
+                                "sidecar_error",
+                                format!("El sidecar se cerró (código {code}). Puede ser bloqueado por el antivirus o falta de permisos."),
+                            );
+                        });
+                    }
                 }
                 _ => {}
             }

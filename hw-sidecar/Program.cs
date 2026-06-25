@@ -14,18 +14,42 @@ var opts = new JsonSerializerOptions
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
 };
 
-using var reader = new HardwareReader();
+// Intentar inicializar con timeout para detectar cuelgues de hardware
+HardwareReader? reader = null;
+var initTask = Task.Run(() => new HardwareReader());
+try
+{
+    if (initTask.Wait(TimeSpan.FromSeconds(15)))
+        reader = initTask.Result;
+    else
+        Console.Error.WriteLine("[hw] Timeout inicializando hardware (>15s)");
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"[hw] Error inicializando hardware: {ex.Message}");
+}
+
+if (reader == null)
+{
+    // Sin lector: emitir snapshots vacíos para que la app muestre error correcto
+    Console.Error.WriteLine("[hw] Iniciando en modo degradado (sin datos de hardware)");
+}
 
 while (true)
 {
     try
     {
-        var snapshot = reader.Read();
+        HwSnapshot snapshot;
+        if (reader != null)
+            snapshot = reader.Read();
+        else
+            snapshot = new HwSnapshot(null, null, null);
+
         Console.WriteLine(JsonSerializer.Serialize(snapshot, opts));
     }
-    catch
+    catch (Exception ex)
     {
-        // Continuar en el siguiente ciclo si hay error puntual de lectura
+        Console.Error.WriteLine($"[hw] Error leyendo sensores: {ex.Message}");
     }
     await Task.Delay(intervalMs);
 }

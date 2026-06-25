@@ -23,8 +23,15 @@ public sealed class HardwareReader : IDisposable
     {
         foreach (var hw in _computer.Hardware)
         {
-            hw.Update();
-            foreach (var sub in hw.SubHardware) sub.Update();
+            try
+            {
+                hw.Update();
+                foreach (var sub in hw.SubHardware) sub.Update();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[hw] Error actualizando {hw.Name}: {ex.Message}");
+            }
         }
 
         CpuData?    cpu    = null;
@@ -40,7 +47,8 @@ public sealed class HardwareReader : IDisposable
                 case HardwareType.GpuNvidia or HardwareType.GpuAmd or HardwareType.GpuIntel when gpu == null:
                     gpu = ReadGpu(hw); break;
                 case HardwareType.Memory when memory == null:
-                    memory = ReadMemory(hw); break;
+                    try { memory = ReadMemory(hw); } catch { }
+                    break;
             }
         }
 
