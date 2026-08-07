@@ -45,6 +45,9 @@ export default function App() {
     const appWindow = getCurrentWindow();
     let saveTimer: ReturnType<typeof setTimeout>;
     const unlistenPromise = appWindow.onMoved(({ payload }) => {
+      // Windows reporta -32000,-32000 cuando la ventana está minimizada:
+      // no es una posición elegida por el usuario, no debe persistirse.
+      if (payload.x <= -30000 || payload.y <= -30000) return;
       clearTimeout(saveTimer);
       saveTimer = setTimeout(() => {
         invoke("save_mini_position", { x: payload.x, y: payload.y });

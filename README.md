@@ -5,7 +5,7 @@
 **Monitor de hardware gaming — temperatura, frecuencia, carga, RAM y ventiladores en tiempo real.**
 **Gaming hardware monitor — temperature, frequency, load, RAM and fans in real time.**
 
-[![Version](https://img.shields.io/badge/versión-1.0.0-brightgreen)](#-historial-de-versiones--changelog)
+[![Version](https://img.shields.io/badge/versión-1.0.1-brightgreen)](#-historial-de-versiones--changelog)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-24C8DB?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/Rust-1.77-000000?logo=rust&logoColor=white)](https://www.rust-lang.org)
@@ -52,7 +52,7 @@
 ### 🚀 Instalación
 
 **Opción A — Instalador (recomendado):**
-1. Descarga `HW-Poxi_1.0.0_x64-setup.exe` desde [Releases](../../releases).
+1. Descarga `HW-Poxi_1.0.1_x64-setup.exe` desde [Releases](../../releases).
 2. Ejecútalo y sigue el asistente.
 3. Abre **HW Poxi** y acepta el prompt de administrador.
 
@@ -131,7 +131,7 @@ deploy.bat          # compila todo y copia a deploy-hosting/
 ### 🚀 Installation
 
 **Option A — Installer (recommended):**
-1. Download `HW-Poxi_1.0.0_x64-setup.exe` from [Releases](../../releases).
+1. Download `HW-Poxi_1.0.1_x64-setup.exe` from [Releases](../../releases).
 2. Run it and follow the wizard.
 3. Open **HW Poxi** and accept the administrator prompt.
 
@@ -177,6 +177,20 @@ Motor de sensores basado en / Sensor engine based on:
 ---
 
 ## 📋 Historial de versiones / Changelog
+
+### v1.0.1 — Corrección del Modo Mini / Mini mode fix
+
+**🇪🇸 Español**
+
+- **Corregido: el Modo Mini no se veía** — al minimizar la app estando en modo mini, Windows reporta la posición `-32000, -32000` (valor interno de ventana minimizada) y esa coordenada se guardaba como si fuera la posición elegida por el usuario. En los siguientes arranques la ventana mini se restauraba fuera de la pantalla: existía y funcionaba, pero era invisible.
+- **Validación de posición** — al restaurar la ventana mini se comprueba que la posición caiga dentro de un monitor conectado. Si no, la ventana se centra automáticamente. Esto también cubre cambios de resolución y desconectar una pantalla secundaria.
+- **Tamaño en unidades lógicas** — el modo mini usaba píxeles físicos, por lo que en pantallas con escalado de Windows (125 % / 150 %) la vista quedaba aplastada bajo la barra de título.
+
+**🇬🇧 English**
+
+- **Fixed: Mini mode was invisible** — minimizing the app while in mini mode made Windows report position `-32000, -32000` (its internal marker for a minimized window), and that coordinate was saved as if the user had chosen it. On later launches the mini window was restored off-screen: present and working, but invisible.
+- **Position validation** — the restored mini window position is now checked against the connected monitors. If it falls outside all of them, the window is centered automatically. This also covers resolution changes and unplugging a secondary display.
+- **Logical size units** — mini mode used physical pixels, so on scaled Windows displays (125% / 150%) the view was squashed under the title bar.
 
 ### v1.0.0 — Lanzamiento inicial / Initial release
 

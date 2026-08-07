@@ -82,25 +82,53 @@ pub fn set_always_on_top(window: WebviewWindow, enabled: bool) {
 pub fn set_window_mode(window: WebviewWindow, mode: String) {
     match mode.as_str() {
         "mini" => {
-            let _ = window.set_size(tauri::Size::Physical(tauri::PhysicalSize {
-                width: 340,
-                height: 110,
+            // Lógico, no físico: en pantallas con escalado (125/150 %) el tamaño
+            // físico dejaba la vista aplastada bajo la barra de título.
+            let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize {
+                width: 340.0,
+                height: 110.0,
             }));
             let _ = window.set_resizable(false);
         }
         _ => {
-            let _ = window.set_size(tauri::Size::Physical(tauri::PhysicalSize {
-                width: 860,
-                height: 580,
+            let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize {
+                width: 860.0,
+                height: 580.0,
             }));
             let _ = window.set_resizable(true);
         }
     }
 }
 
+/// ¿Es (x, y) una posición visible en alguno de los monitores conectados?
+/// Descarta coords de ventana minimizada (-32000) y posiciones huérfanas
+/// tras cambiar de resolución o desconectar una pantalla.
+fn position_is_visible(window: &WebviewWindow, x: i32, y: i32) -> bool {
+    if x <= -30000 || y <= -30000 {
+        return false;
+    }
+    let Ok(monitors) = window.available_monitors() else {
+        return true; // sin datos de monitores, no bloqueamos al usuario
+    };
+    monitors.iter().any(|m| {
+        let pos = m.position();
+        let size = m.size();
+        // Basta con que quepa la esquina superior izquierda + un margen
+        // suficiente para agarrar la barra de título y arrastrarla.
+        x >= pos.x
+            && y >= pos.y
+            && x + 80 <= pos.x + size.width as i32
+            && y + 40 <= pos.y + size.height as i32
+    })
+}
+
 #[tauri::command]
 pub fn set_window_position(window: WebviewWindow, x: i32, y: i32) {
-    let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
+    if position_is_visible(&window, x, y) {
+        let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
+    } else {
+        let _ = window.center();
+    }
 }
 
 #[tauri::command]
