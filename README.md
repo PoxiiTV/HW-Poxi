@@ -11,7 +11,7 @@
 [![Rust](https://img.shields.io/badge/Rust-1.77-000000?logo=rust&logoColor=white)](https://www.rust-lang.org)
 [![CSharp](https://img.shields.io/badge/C%23-.NET%208-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com)
 [![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white)](#)
-[![License](https://img.shields.io/badge/license-MIT-9b5cf6)](LICENSE)
+[![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-9b5cf6)](LICENSE)
 
 *Interfaz glassmorphism · ejecutable único · datos reales del hardware*
 
@@ -223,6 +223,14 @@ Motor de sensores basado en / Sensor engine based on:
 - **Export CSV** — saves session sensor history to Downloads
 - **Single executable** — C# sidecar is embedded; no extra files to distribute
 - **Auto UAC** — requests admin permissions on launch for full hardware access
+
+## 📜 Licencia / License
+
+**HW Poxi** se distribuye bajo la **PolyForm Noncommercial License 1.0.0** 🔒.
+
+Libre para **uso personal** — vigilar tu hardware, aprender y experimentar. Prohibido el **uso comercial**: no se puede vender ni obtener beneficio económico con este proyecto.
+
+📄 Texto completo en [`LICENSE`](LICENSE).
 
 <div align="center">
 
