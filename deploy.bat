@@ -11,6 +11,8 @@ if errorlevel 1 goto error
 cd ..
 
 echo.
+rem Borra instaladores de versiones anteriores para no copiarlos
+del /q "src-tauri\target\release\bundle\nsis\*.exe" "src-tauri\target\release\bundle\msi\*.msi" 2>nul
 echo [2/3] Compilando HW Poxi (sidecar embebido)...
 cargo tauri build
 if errorlevel 1 goto error
@@ -20,7 +22,7 @@ echo [3/3] Copiando a deploy-hosting...
 if not exist deploy-hosting mkdir deploy-hosting
 if not exist deploy-hosting\portable mkdir deploy-hosting\portable
 
-rem Portable — solo el exe (el sidecar va embebido dentro)
+rem Portable: solo el exe (el sidecar va embebido dentro)
 copy "src-tauri\target\release\app.exe" "deploy-hosting\portable\HW-Poxi.exe" /Y
 
 rem Instaladores
