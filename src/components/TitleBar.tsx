@@ -1,3 +1,4 @@
+import logo from "../assets/logo.png";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { useStore } from "../store";
@@ -47,18 +48,7 @@ export function TitleBar() {
         className="flex items-center gap-2 pointer-events-none select-none"
         data-tauri-drag-region
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
-          <path d="M12 2L2 7l10 5 10-5-10-5z" fill="url(#g1)" />
-          <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="url(#g2)" strokeWidth="1.5" strokeLinecap="round" />
-          <defs>
-            <linearGradient id="g1" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
-              <stop stopColor="var(--color-accent)" /><stop offset="1" stopColor="var(--color-accent-2)" />
-            </linearGradient>
-            <linearGradient id="g2" x1="2" y1="12" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-              <stop stopColor="var(--color-accent)" /><stop offset="1" stopColor="var(--color-accent-2)" />
-            </linearGradient>
-          </defs>
-        </svg>
+        <img src={logo} alt="" width={16} height={16} className="shrink-0" style={{ imageRendering: "pixelated" }} />
         <span className="text-[11px] font-semibold tracking-widest text-gradient uppercase">
           HW Poxi
         </span>
